@@ -1,33 +1,94 @@
+@import url('https://fonts.googleapis.com/css?family=Permanent+Marker&display=swap');
+
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 40vmin;
-  pointer-events: none;
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  height: 100%;
+  display : flex;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
+  background-color: #95afc0;
+
+  font-family: 'Lucida Console', monospace;
 }
 
-.App-link {
-  color: #61dafb;
+.board-wrapper {
+  position: relative;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.game-info-wrapper {
+  position: absolute;
+  left: -20px;
+  transform: translateX(-100%);
+  padding : 15px;
+  border: 2px solid #535c68;
+  border-radius: 5px;
+  font-size: 20px;
+  min-width: 170px;
+}
+
+.game-info-wrapper .title{
+  margin: 0 0 10px;
+  font-size: 25px;
+}
+
+.game-info-wrapper .player{
+  font-size: 25px;
+  font-family: 'Permanent Marker', cursive;
+}
+
+.game-info-wrapper .game-info > p {
+  margin: 0 0 7px;
+}
+
+.board-row{
+  display: flex;
+}
+
+.board-cell {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 30px;
+  font-size: 30px;
+  font-weight: 900;
+  font-family: 'Permanent Marker', cursive;
+
+  margin: 1px;
+  padding: 0;
+  background-color: #fff;
+}
+
+button.board-cell{
+  outline: 0;
+  border : 0;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.player.X{
+  color: #eb4d4b;
+}
+.player.O{
+  color: #4834d4;
+}
+
+.player.draw{
+  color: #27ae60;
+}
+
+.board-cell.X, .board-cell.O{
+  cursor: not-allowed;
+}
+
+.result-wrapper {
+  font-size: 30px;
+}
+
+.result.player{
+  font-size: 90px;
+  font-weight: 900;
+  font-family: 'Permanent Marker', cursive;
+}
+
+.text-center {
+  text-align: center !important;
 }
