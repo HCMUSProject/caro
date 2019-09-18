@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "/caro/static/css/main.237538a3.chunk.css",
+    "main.js": "/caro/static/js/main.1baad5cb.chunk.js",
+    "main.js.map": "/caro/static/js/main.1baad5cb.chunk.js.map",
+    "runtime~main.js": "/caro/static/js/runtime~main.f588c28b.js",
+    "runtime~main.js.map": "/caro/static/js/runtime~main.f588c28b.js.map",
+    "static/css/2.c778392e.chunk.css": "/caro/static/css/2.c778392e.chunk.css",
+    "static/js/2.e16bb615.chunk.js": "/caro/static/js/2.e16bb615.chunk.js",
+    "static/js/2.e16bb615.chunk.js.map": "/caro/static/js/2.e16bb615.chunk.js.map",
+    "index.html": "/caro/index.html",
+    "precache-manifest.91f15fa1f476fef507d4af926453fcf1.js": "/caro/precache-manifest.91f15fa1f476fef507d4af926453fcf1.js",
+    "service-worker.js": "/caro/service-worker.js",
+    "static/css/2.c778392e.chunk.css.map": "/caro/static/css/2.c778392e.chunk.css.map",
+    "static/css/main.237538a3.chunk.css.map": "/caro/static/css/main.237538a3.chunk.css.map",
+    "static/media/semantic.min.css": "/caro/static/media/outline-icons.ef60a4f6.woff"
+  }
+}
