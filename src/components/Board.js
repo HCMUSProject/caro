@@ -217,10 +217,10 @@ class Board extends Component {
 
     let leftCol = col, rightCol = col;
 
-    while (leftCol >= 0 && leftCol < size && board[row][leftCol] === player) {
+    while (leftCol >= 0 && board[row][leftCol] === player) {
       --leftCol;
     }
-    while (rightCol >= 0 && rightCol < size && board[row][rightCol] === player) {
+    while (rightCol < size && board[row][rightCol] === player) {
       ++rightCol;
     }
 
@@ -232,7 +232,7 @@ class Board extends Component {
     const diff = rightCol - leftCol + 1;
 
     // chỉ cần kiểm tra trên 1 hàng có đủ số lượng hay không
-    if (diff === numToWin) {
+    if (diff >= numToWin) {
       // bàn cờ có kích thước bằng với số lượng win.
       if (size === numToWin) return true;
 
@@ -241,33 +241,183 @@ class Board extends Component {
       /////////////////////////////////////////////////
 
 
-      // chưa bị chặn bên trái
-      if (leftCol > 0 && board[row][--leftCol] !== competitorPlayer) {
+      // bên trái đã có player hoặc chưa bị chặn bên trái
+      if ((leftCol === 0 && board[row][leftCol] === player) ||
+          (leftCol > 0 && board[row][--leftCol] !== competitorPlayer)) {
         return true;
       }
 
-      // chưa bị chặn bên trái
-      if (rightCol < size - 1 && board[row][++rightCol] !== competitorPlayer) {
+      // bên phải đã có player hoặc chưa bị chặn bên phải
+      if ((rightCol === size - 1 && board[row][rightCol] === player) ||
+          (rightCol < size - 1 && board[row][++rightCol] !== competitorPlayer)) {
         return true;
       }
     }
     return false;
   }
 
-  checkingVertical = () => {
+  checkingVertical = (row, col, player) => {
+    const competitorPlayer = player === 'X' ? 'O' : 'X';
+
+    const { board } = this.state;
+
+    const { size, numToWin } = this.props;
+
+    let topRow = row, botRow = row;
+
+    while (topRow >= 0 && board[topRow][col] === player) {
+      --topRow;
+    }
+    while (botRow < size && board[botRow][col] === player) {
+      ++botRow;
+    }
+
+    ++topRow;
+    --botRow;
+
+    // đã có điểm đầu tiên [topRow, col] và điểm cuối [botRow, col]
+
+    const diff = botRow - topRow + 1;
+
+    // chỉ cần kiểm tra trên 1 cột có đủ số lượng hay không
+    if (diff >= numToWin) {
+      // bàn cờ có kích thước bằng với số lượng win.
+      if (size === numToWin) return true;
+
+      /////////////////////////////////////////////////
+      //    trường hợp bàn cờ lớn hơn số lượng win   //
+      /////////////////////////////////////////////////
+
+
+      // bên trên đã có player hoặc chưa bị chặn bên trên
+      if ((topRow === 0 && board[topRow][col] === player) ||
+            (topRow > 0 && board[--topRow][col] !== competitorPlayer)) {
+        return true;
+      }
+
+      // bên dưới đã có player hoặc chưa bị chặn bên dưới
+      if ((botRow === size - 1 && board[botRow][col] === player) ||
+            (botRow < size - 1 && board[++botRow][col] !== competitorPlayer)) {
+        return true;
+      }
+    }
     return false;
   }
 
-  checkingMainDiagonal = () => {
+  checkingMainDiagonal = (row, col, player) => {
+    const competitorPlayer = player === 'X' ? 'O' : 'X';
+
+    const { board } = this.state;
+
+    const { size, numToWin } = this.props;
+
+    // let topRow = row, botRow = row;
+
+    let pStart = { row , col }, pEnd = { row , col };
+
+    while (pStart.row >= 0 && pStart.col >= 0 && board[pStart.row][pStart.col] === player) {
+      --pStart.row;
+      --pStart.col;
+    }
+    while (pEnd.row < size && pEnd.col < size && board[pEnd.row][pEnd.col] === player) {
+      ++pEnd.row;
+      ++pEnd.col;
+    }
+    ++pStart.row;
+    ++pStart.col;
+
+    --pEnd.row;
+    --pEnd.col;
+
+    // đã có điểm đầu tiên [topRow, col] và điểm cuối [botRow, col]
+
+    const diff = pEnd.row - pStart.row + 1;
+
+    // chỉ cần kiểm tra trên 1 cột có đủ số lượng hay không
+    if (diff >= numToWin) {
+
+      /////////////////////////////////////////////////
+      //    trường hợp bàn cờ lớn hơn số lượng win   //
+      /////////////////////////////////////////////////
+
+      // trường hợp sát biên
+      if ((pStart.row === 0 && pEnd.col === size - 1) || (pStart.col === 0 && pEnd.row === size - 1)) {
+        return true;
+      }
+
+      // điểm trên đã có player hoặc chưa bị chặn bên trên
+      if ((pStart.row === 0 && pStart.col === 0 && board[pStart.row][pStart.col] === player) || 
+            (pStart.row > 0 && pStart.col > 0 && board[--pStart.row][--pStart.col] !== competitorPlayer)) {
+        return true;
+      }
+
+      // điểm dưới đã có player hoặc chưa bị chặn bên dưới
+      if ((pEnd.row === size - 1 && pEnd.col === size - 1 && board[pEnd.row][pEnd.col] === player) || 
+            (pEnd.row < size - 1 && pEnd.col < size - 1 && board[++pEnd.row][++pEnd.col] !== competitorPlayer)) {
+        return true;
+      }
+    }
     return false;
   }
-  checkingSubDiagonal = () => {
+  checkingSubDiagonal = (row, col, player) => {
+    const competitorPlayer = player === 'X' ? 'O' : 'X';
+
+    const { board } = this.state;
+
+    const { size, numToWin } = this.props;
+
+    // let topRow = row, botRow = row;
+
+    let pStart = { row , col }, pEnd = { row , col };
+
+    while (pStart.row >= 0 && pStart.col < size && board[pStart.row][pStart.col] === player) {
+      --pStart.row;
+      ++pStart.col;
+    }
+    while (pEnd.row < size && pEnd.col >= 0 && board[pEnd.row][pEnd.col] === player) {
+      ++pEnd.row;
+      --pEnd.col;
+    }
+    ++pStart.row;
+    --pStart.col;
+
+    --pEnd.row;
+    ++pEnd.col;
+
+    // đã có điểm đầu tiên [topRow, col] và điểm cuối [botRow, col]
+
+    const diff = pEnd.row - pStart.row + 1;
+
+    // chỉ cần kiểm tra trên 1 cột có đủ số lượng hay không
+    if (diff >= numToWin) {
+
+      /////////////////////////////////////////////////
+      //    trường hợp bàn cờ lớn hơn số lượng win   //
+      /////////////////////////////////////////////////
+
+      // trường hợp sát biên
+      if ((pStart.col === size - 1 && pEnd.row === size - 1) || (pStart.row === 0 && pEnd.col === 0)) {
+        return true;
+      }
+
+      // chưa bị chặn bên trên
+      if ((pStart.row === 0 && pStart.col === size - 1 && board[pStart.row][pStart.col] === player) ||
+            (pStart.row > 0 && pStart.col < size - 1 && board[--pStart.row][++pStart.col] !== competitorPlayer)) {
+        return true;
+      }
+
+      // chưa bị chặn bên dưới
+      if ((pEnd.row === size - 1 && pEnd.col === 0 && board[pEnd.row][pEnd.col] === player) ||
+            (pEnd.row < size - 1 && pEnd.col > 0 && board[++pEnd.row][--pEnd.col] !== competitorPlayer)) {
+        return true;
+      }
+    }
     return false;
   }
 
   isTerminated = (row, col, player) => {
-    return this.checkingHorizontal(row, col, player) || this.checkingVertical()
-      || this.checkingMainDiagonal() || this.checkingSubDiagonal();
+    return this.checkingHorizontal(row, col, player) || this.checkingVertical(row, col, player)
+      || this.checkingMainDiagonal(row, col, player) || this.checkingSubDiagonal(row, col, player);
   }
 
   isFull = () => {
@@ -284,7 +434,7 @@ class Board extends Component {
 }
 
 Board.defaultProps = {
-  size: 5,
+  size: 6,
   numToWin: 3
 }
 
