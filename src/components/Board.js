@@ -9,7 +9,7 @@ class Board extends Component {
 
     this.state = {
       board: new Array(props.size).fill(null).map(el => new Array(props.size).fill(null)),
-      xIsNext: true,
+      xIsNext: Math.random() >= 0.5,
       isStart: true,
       winner: null,
       isDraw: false,
@@ -47,13 +47,12 @@ class Board extends Component {
     let cloneBoard = board;
     cloneBoard[row][col] = xIsNext ? 'X' : 'O';
 
-    let player = xIsNext ? 'X' : 'O';
-
-
     this.setState({
       board: cloneBoard,
       xIsNext: !this.state.xIsNext
     }, () => {
+
+      let player = this.state.board[row][col];
 
       const hasWinner = this.isTerminated(row, col, player);
       // draw
@@ -101,7 +100,7 @@ class Board extends Component {
   resetGame = () => {
     this.setState({
       board: new Array(this.props.size).fill(null).map(el => new Array(this.props.size).fill(null)),
-      xIsNext: true,
+      xIsNext: Math.random() >= 0.5,
       isStart: true,
       winner: null,
       open: false,
@@ -211,47 +210,38 @@ class Board extends Component {
 
     const competitorPlayer = player === 'X' ? 'O' : 'X';
 
-    const { board } = this.state;
+    const { board } = this.state, { size, numToWin } = this.props;
 
-    const { size, numToWin } = this.props;
+    let pStart = { row , col }, pEnd = { row , col };
 
-    let leftCol = col, rightCol = col;
-
-    while (leftCol >= 0 && board[row][leftCol] === player) {
-      --leftCol;
+    while (pStart.col >= 0 && board[row][pStart.col] === player) {
+      --pStart.col;
     }
-    while (rightCol < size && board[row][rightCol] === player) {
-      ++rightCol;
+    while (pEnd.col < size && board[row][pEnd.col] === player) {
+      ++pEnd.col;
     }
 
-    ++leftCol;
-    --rightCol;
+    ++pStart.col;
+    --pEnd.col;
 
-    // đã có điểm đầu tiên [row, leftCol] và điểm cuối [row, rightCol]
+    // đã có điểm đầu tiên [row, pStart.col] và điểm cuối [row, pEnd.col]
 
-    const diff = rightCol - leftCol + 1;
+    const diff = pEnd.col - pStart.col + 1;
 
-    // chỉ cần kiểm tra trên 1 hàng có đủ số lượng hay không
-    if (diff >= numToWin) {
-      // bàn cờ có kích thước bằng với số lượng win.
-      if (size === numToWin) return true;
+    if (diff > numToWin) return true;
 
-      /////////////////////////////////////////////////
-      //    trường hợp bàn cờ lớn hơn số lượng win   //
-      /////////////////////////////////////////////////
+    if (diff === numToWin) {
+      let isBlockOutAbove = false, isBlockOutBelow = false;
 
-
-      // bên trái đã có player hoặc chưa bị chặn bên trái
-      if ((leftCol === 0 && board[row][leftCol] === player) ||
-          (leftCol > 0 && board[row][--leftCol] !== competitorPlayer)) {
-        return true;
+      if (pStart.col > 0 && board[row][--pStart.col] === competitorPlayer) {
+        isBlockOutAbove = true;
       }
 
-      // bên phải đã có player hoặc chưa bị chặn bên phải
-      if ((rightCol === size - 1 && board[row][rightCol] === player) ||
-          (rightCol < size - 1 && board[row][++rightCol] !== competitorPlayer)) {
-        return true;
+      if (pEnd.col < size - 1 && board[row][++pEnd.col] === competitorPlayer) {
+        isBlockOutBelow = true;
       }
+
+      return !(isBlockOutAbove && isBlockOutBelow);
     }
     return false;
   }
@@ -259,47 +249,39 @@ class Board extends Component {
   checkingVertical = (row, col, player) => {
     const competitorPlayer = player === 'X' ? 'O' : 'X';
 
-    const { board } = this.state;
+    const { board } = this.state, { size, numToWin } = this.props;
 
-    const { size, numToWin } = this.props;
+    let pStart = { row , col }, pEnd = { row , col };
 
-    let topRow = row, botRow = row;
-
-    while (topRow >= 0 && board[topRow][col] === player) {
-      --topRow;
+    while (pStart.row >= 0 && board[pStart.row][col] === player) {
+      --pStart.row;
     }
-    while (botRow < size && board[botRow][col] === player) {
-      ++botRow;
+    while (pEnd.row < size && board[pEnd.row][col] === player) {
+      ++pEnd.row;
     }
 
-    ++topRow;
-    --botRow;
+    ++pStart.row;
+    --pEnd.row;
 
-    // đã có điểm đầu tiên [topRow, col] và điểm cuối [botRow, col]
+    // đã có điểm đầu tiên [pStart.row, col] và điểm cuối [pEnd.row, col]
 
-    const diff = botRow - topRow + 1;
+    const diff = pEnd.row - pStart.row + 1;
 
-    // chỉ cần kiểm tra trên 1 cột có đủ số lượng hay không
-    if (diff >= numToWin) {
-      // bàn cờ có kích thước bằng với số lượng win.
-      if (size === numToWin) return true;
+    if (diff > numToWin) return true;
+    
+    if (diff === numToWin) {
+      
+      let isBlockOutAbove = false, isBlockOutBelow = false;
 
-      /////////////////////////////////////////////////
-      //    trường hợp bàn cờ lớn hơn số lượng win   //
-      /////////////////////////////////////////////////
-
-
-      // bên trên đã có player hoặc chưa bị chặn bên trên
-      if ((topRow === 0 && board[topRow][col] === player) ||
-            (topRow > 0 && board[--topRow][col] !== competitorPlayer)) {
-        return true;
+      if (pStart.row > 0 && board[--pStart.row][col] === competitorPlayer) {
+        isBlockOutAbove = true;
       }
 
-      // bên dưới đã có player hoặc chưa bị chặn bên dưới
-      if ((botRow === size - 1 && board[botRow][col] === player) ||
-            (botRow < size - 1 && board[++botRow][col] !== competitorPlayer)) {
-        return true;
+      if (pEnd.row < size - 1 && board[++pEnd.row][col] === competitorPlayer) {
+        isBlockOutBelow = true;
       }
+
+      return !(isBlockOutAbove && isBlockOutBelow);
     }
     return false;
   }
@@ -307,11 +289,7 @@ class Board extends Component {
   checkingMainDiagonal = (row, col, player) => {
     const competitorPlayer = player === 'X' ? 'O' : 'X';
 
-    const { board } = this.state;
-
-    const { size, numToWin } = this.props;
-
-    // let topRow = row, botRow = row;
+    const { board } = this.state, { size, numToWin } = this.props;
 
     let pStart = { row , col }, pEnd = { row , col };
 
@@ -333,40 +311,29 @@ class Board extends Component {
 
     const diff = pEnd.row - pStart.row + 1;
 
-    // chỉ cần kiểm tra trên 1 cột có đủ số lượng hay không
-    if (diff >= numToWin) {
+    if (diff > numToWin) return true;
 
-      /////////////////////////////////////////////////
-      //    trường hợp bàn cờ lớn hơn số lượng win   //
-      /////////////////////////////////////////////////
+    if (diff === numToWin) {
 
-      // trường hợp sát biên
-      if ((pStart.row === 0 && pEnd.col === size - 1) || (pStart.col === 0 && pEnd.row === size - 1)) {
-        return true;
+      let isBlockOutAbove = false, isBlockOutBelow = false;
+
+      if (pStart.row > 0 && pStart.col > 0 && board[--pStart.row][--pStart.col] === competitorPlayer){
+        isBlockOutAbove = true;
       }
 
-      // điểm trên đã có player hoặc chưa bị chặn bên trên
-      if ((pStart.row === 0 && pStart.col === 0 && board[pStart.row][pStart.col] === player) || 
-            (pStart.row > 0 && pStart.col > 0 && board[--pStart.row][--pStart.col] !== competitorPlayer)) {
-        return true;
+      if (pEnd.row < size - 1 && pEnd.col < size - 1 && board[++pEnd.row][++pEnd.col] === competitorPlayer) {
+        isBlockOutBelow = true;
       }
 
-      // điểm dưới đã có player hoặc chưa bị chặn bên dưới
-      if ((pEnd.row === size - 1 && pEnd.col === size - 1 && board[pEnd.row][pEnd.col] === player) || 
-            (pEnd.row < size - 1 && pEnd.col < size - 1 && board[++pEnd.row][++pEnd.col] !== competitorPlayer)) {
-        return true;
-      }
+      return !(isBlockOutAbove && isBlockOutBelow)
     }
     return false;
   }
+
   checkingSubDiagonal = (row, col, player) => {
     const competitorPlayer = player === 'X' ? 'O' : 'X';
 
-    const { board } = this.state;
-
-    const { size, numToWin } = this.props;
-
-    // let topRow = row, botRow = row;
+    const { board } = this.state, { size, numToWin } = this.props;
 
     let pStart = { row , col }, pEnd = { row , col };
 
@@ -384,33 +351,24 @@ class Board extends Component {
     --pEnd.row;
     ++pEnd.col;
 
-    // đã có điểm đầu tiên [topRow, col] và điểm cuối [botRow, col]
 
     const diff = pEnd.row - pStart.row + 1;
 
-    // chỉ cần kiểm tra trên 1 cột có đủ số lượng hay không
-    if (diff >= numToWin) {
+    if (diff > numToWin) return true;
+    
+    if (diff === numToWin) {
 
-      /////////////////////////////////////////////////
-      //    trường hợp bàn cờ lớn hơn số lượng win   //
-      /////////////////////////////////////////////////
+      let isBlockOutAbove = false, isBlockOutBelow = false;
 
-      // trường hợp sát biên
-      if ((pStart.col === size - 1 && pEnd.row === size - 1) || (pStart.row === 0 && pEnd.col === 0)) {
-        return true;
+      if (pStart.row > 0 && pStart.col < size - 1 && board[--pStart.row][++pStart.col] === competitorPlayer){
+        isBlockOutAbove = true;
       }
 
-      // chưa bị chặn bên trên
-      if ((pStart.row === 0 && pStart.col === size - 1 && board[pStart.row][pStart.col] === player) ||
-            (pStart.row > 0 && pStart.col < size - 1 && board[--pStart.row][++pStart.col] !== competitorPlayer)) {
-        return true;
+      if (pEnd.row < size - 1 && pEnd.col > 0 && board[++pEnd.row][--pEnd.col] === competitorPlayer){
+        isBlockOutBelow = true;
       }
 
-      // chưa bị chặn bên dưới
-      if ((pEnd.row === size - 1 && pEnd.col === 0 && board[pEnd.row][pEnd.col] === player) ||
-            (pEnd.row < size - 1 && pEnd.col > 0 && board[++pEnd.row][--pEnd.col] !== competitorPlayer)) {
-        return true;
-      }
+      return !(isBlockOutAbove && isBlockOutBelow);
     }
     return false;
   }
@@ -434,8 +392,8 @@ class Board extends Component {
 }
 
 Board.defaultProps = {
-  size: 6,
-  numToWin: 3
+  size: 20,
+  numToWin: 5
 }
 
 export default Board;
