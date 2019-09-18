@@ -19,19 +19,50 @@ class Board extends Component {
     }
   }
 
-  onCellClick = (idx) => {
-    const px = parseInt(idx / this.props.size), py = parseInt(idx % this.props.size);
+  setDraw = () => {
+    this.setState({
+      isStart: false,
+      winner: 'XO',
+      isDraw: true,
+      resultModal: true
+    });
+  }
 
-    if (!this.state.isStart || this.state.winner || this.state.board[px][py])
+  setWinner = (player) => {
+    this.setState({
+      isStart: false,
+      winner: player,
+      isDraw: false,
+      resultModal: true
+    });
+  }
+
+  onCellClick = (row, col) => {
+
+    const { isStart, winner, board, xIsNext } = this.state;
+
+    if (!isStart || winner || board[row][col])
       return;
 
-    let cloneBoard = this.state.board;
+    let cloneBoard = board;
+    cloneBoard[row][col] = xIsNext ? 'X' : 'O';
 
-    cloneBoard[px][py] = this.state.xIsNext ? 'X' : 'O';
+    let player = xIsNext ? 'X' : 'O';
+
 
     this.setState({
       board: cloneBoard,
       xIsNext: !this.state.xIsNext
+    }, () => {
+
+      const hasWinner = this.isTerminated(row, col, player);
+      // draw
+      if (this.isFull() && !hasWinner) {
+        return this.setDraw();
+      }
+      if (hasWinner) {
+        return this.endGame(player);
+      }
     })
   }
 
@@ -45,9 +76,10 @@ class Board extends Component {
               row.map((cell, iCell) => (
                 <Cell
                   key={iRow * this.props.size + iCell}
-                  index={iRow * this.props.size + iCell}
+                  row={iRow}
+                  col={iCell}
                   val={cell}
-                  onClick={(idx) => this.onCellClick(idx)} />
+                  onClick={(row, col) => this.onCellClick(row, col)} />
               ))
             }
           </div>
@@ -73,7 +105,7 @@ class Board extends Component {
       isStart: true,
       winner: null,
       open: false,
-      resultModal : false
+      resultModal: false
     })
   }
 
@@ -82,6 +114,7 @@ class Board extends Component {
       open: !this.state.open
     });
   }
+
   toggleResultModal = () => {
     this.setState({
       resultModal: !this.state.resultModal
@@ -130,8 +163,9 @@ class Board extends Component {
 
   render() {
 
-    const { isLoading, winner, xIsNext, open } = this.state;
+    const { isLoading, xIsNext, open } = this.state;
 
+    const symbol = xIsNext ? 'X' : 'O';
 
     if (isLoading) {
       return (
@@ -144,13 +178,8 @@ class Board extends Component {
           <h3 className='title'>Tic-Tac-Toe</h3>
           <div className='game-info'>
             <p>Player: &nbsp;
-              <span className={`player${xIsNext ? ' X' : ' O'}`}>
-                {xIsNext ? 'X' : 'O'}
-              </span>
-            </p>
-            <p>Winner: &nbsp;
-              <span className={`player${winner ? ' X' : ' O'}`}>
-                {winner}
+              <span className={`player${' ' + symbol}`}>
+                {symbol}
               </span>
             </p>
 
@@ -158,6 +187,7 @@ class Board extends Component {
 
             <Confirm
               open={open}
+              size='mini'
               onCancel={this.toggleConfirm}
               onConfirm={this.resetGame}
               header='Confirm'
@@ -175,10 +205,87 @@ class Board extends Component {
   }
 
   // giai thuat kiem tra chien thang
+
+
+  checkingHorizontal = (row, col, player) => {
+
+    const competitorPlayer = player === 'X' ? 'O' : 'X';
+
+    const { board } = this.state;
+
+    const { size, numToWin } = this.props;
+
+    let leftCol = col, rightCol = col;
+
+    while (leftCol >= 0 && leftCol < size && board[row][leftCol] === player) {
+      --leftCol;
+    }
+    while (rightCol >= 0 && rightCol < size && board[row][rightCol] === player) {
+      ++rightCol;
+    }
+
+    ++leftCol;
+    --rightCol;
+
+    // đã có điểm đầu tiên [row, leftCol] và điểm cuối [row, rightCol]
+
+    const diff = rightCol - leftCol + 1;
+
+    // chỉ cần kiểm tra trên 1 hàng có đủ số lượng hay không
+    if (diff === numToWin) {
+      // bàn cờ có kích thước bằng với số lượng win.
+      if (size === numToWin) return true;
+
+      /////////////////////////////////////////////////
+      //    trường hợp bàn cờ lớn hơn số lượng win   //
+      /////////////////////////////////////////////////
+
+
+      // chưa bị chặn bên trái
+      if (leftCol > 0 && board[row][--leftCol] !== competitorPlayer) {
+        return true;
+      }
+
+      // chưa bị chặn bên trái
+      if (rightCol < size - 1 && board[row][++rightCol] !== competitorPlayer) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  checkingVertical = () => {
+    return false;
+  }
+
+  checkingMainDiagonal = () => {
+    return false;
+  }
+  checkingSubDiagonal = () => {
+    return false;
+  }
+
+  isTerminated = (row, col, player) => {
+    return this.checkingHorizontal(row, col, player) || this.checkingVertical()
+      || this.checkingMainDiagonal() || this.checkingSubDiagonal();
+  }
+
+  isFull = () => {
+    const { board } = this.state;
+
+    return board.every(row => {
+      return row.every(cell => cell);
+    });
+  }
+
+  endGame = (player) => {
+    this.setWinner(player);
+  }
 }
 
 Board.defaultProps = {
-  size: 20
+  size: 5,
+  numToWin: 3
 }
 
 export default Board;
