@@ -93,8 +93,6 @@ class Board extends Component {
         isLoading: false
       });
     }, 200 + Math.random() * 1000);
-
-    document.title = 'Caro Vietnam'
   }
 
   resetGame = () => {
